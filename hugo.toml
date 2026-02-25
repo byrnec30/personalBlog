@@ -1,6 +1,6 @@
 baseURL = "https://byrnec30.github.io/personalBlog/"
 languageCode = "en-us"
-title = "Codex Blog"
+title = "Clare Byrne"
 theme = "diary"
 enableRobotsTXT = true
 
@@ -22,9 +22,9 @@ enableRobotsTXT = true
   enableOpenGraph = true
   enableTwitterCards = true
   enableReadingTime = true
-  title = "Codex Blog"
-  subtitle = "A diary-style site powered by Hugo."
-  description = "A Hugo website inspired by the Diary theme."
+  title = "Clare Byrnes"
+  subtitle = "Tech notes"
+  description = ""
   mainSections = ["posts"]
   [params.nav]
     enableRSS = true
