@@ -1,4 +1,4 @@
-baseURL = "https://byrnec30.github.io/codexBlog/"
+baseURL = "https://byrnec30.github.io/personalBlog/"
 languageCode = "en-us"
 title = "Codex Blog"
 theme = "diary"
@@ -29,7 +29,7 @@ enableRobotsTXT = true
   [params.nav]
     enableRSS = true
   [params.social]
-    github = "YOUR_GITHUB_USERNAME"
+    github = "byrnec30"
 
 [menu]
   [[menu.main]]
