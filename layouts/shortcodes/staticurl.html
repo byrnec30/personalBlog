@@ -1,1 +1,5 @@
-{{- .Get 0 | relURL -}}
+{{- $p := .Get 0 -}}
+{{- if not (hasPrefix $p "/") -}}
+  {{- $p = printf "/%s" $p -}}
+{{- end -}}
+{{- $p | relURL -}}

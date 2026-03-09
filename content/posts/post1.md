@@ -13,12 +13,14 @@ I created a very basic app to log observations of native plant and animal specie
 
 
 <video controls preload="metadata" width="100%">
+  <source src="{{< staticurl "post1/screenRecordingBlogPost1.mp4" >}}" type="video/mp4">
+  <source src="{{< staticurl "post1/screenRecordingBlogPost1.m4v" >}}" type="video/mp4">
   <source src="{{< staticurl "post1/screenRecordingBlogPost1.mov" >}}" type="video/quicktime">
   Your browser does not support the video tag.
 </video>
 
 
-[Download the screen recording]({{< staticurl "post1/screenRecordingBlogPost1.mov" >}})
+[Download the screen recording]({{< staticurl "post1/screenRecordingBlogPost1.mp4" >}})
 
 
 My simple React and Next.js app has a Zustand store to manage its state. My Zustand store has three state fields:
@@ -26,9 +28,11 @@ My simple React and Next.js app has a Zustand store to manage its state. My Zust
 - byId, a dictionary object that maps each observation to its Id number; it’s a handy way to look up an individual observation.
 - allIds, an array of only the Ids of each observation in the database. This is a code example of how I used field as a straightforward way to refresh the data delivered to my components, by mapping each Id to its record:
 
+
 ```jsx
 const observations = allIds.map((id) => byId[id])
 ```
+
 
 - And lastly, filters, which stores the current active filters; elsewhere in my store I’ve set these to be ‘location’ and ‘species’, like you can see in the filter boxes above.
 
@@ -80,6 +84,7 @@ export const selectFilteredObservations = (state: ObservationsState) => {
 }
 ```
 
+
 Only one of my selectors, selectObservationById, didn’t cause any errors; sadly I have no real need for this selector, as it’s just using my store’s byId state field that I have already. It is kind of useful for reusability, as I can just import selectObservationById and it’s probably easier than calling the state field function each time, plus I can put in some type checking there with TypeScript to make sure Id is a number. It also matches the other selectors format, which is nice for readability (if only they’d worked).
 
 Here’s where I hit my bug.
@@ -99,13 +104,14 @@ The problem is that Map and Filter functions produce a new array instance on eve
 [Understanding React's render phase (Stackademic)](https://blog.stackademic.com/understanding-reacts-render-phase-a-simplified-guide-3a84ea7aacba)
 
 
-![The objects don’t look the same any more]({{< staticurl "post1/diagramBlog1.jpg" >}})
+<img src="{{< staticurl "post1/diagramBlog1.jpg" >}}" alt="The objects don’t look the same any more" style="width: 66.67%; height: auto;">
 
 The objects don’t look the same any more
 
 That’s why we’re getting this error about an infinite loop.
 
 How did I fix this? Really easy - I put all my selectors on the client side instead. I made a filter function in a util file, and I import it when I need it. I can use the .map() and .filter() functions here no problem, because all this filtering only renders on the client side, so we never get this mismatch between the client and server snapshots.
+
 
 ```tsx
 function getFilteredIds(list: Observation[], filters: Filters): number[] {
@@ -130,6 +136,7 @@ export function applyFilters(
 }
 ```
 
+
 We don’t get this same error in the store state fields, because when the store is initially created on the server side, the state fields remain empty. These fields will only be populated when the setAll function is called, after the client side has already been hydrated.
 
 `byId` = `{}`
@@ -143,6 +150,7 @@ The problem with these two selectors is that they create non-stable references d
 Another fix that I tried was to see if I could memoize the selectors. The idea here is that we’re trying to stop the selector producing a different array instance between the server and client renders. This memoize wrapper means that the selector will reuse the same array reference as long as nothing changes - and on the *first* render, nothing does change.
 
 The first render is the only important one here, because when React hydrates, it only expects the initial client render to produce the exact same DOM structure as it got from the server. After hydration, it stops comparing the server completely. Then we can still use this selector to filter and produce different arrays, because after hydration everything is just a normal re-render.
+
 
 ```tsx
 import { memoize } from 'proxy-memoize';
@@ -160,6 +168,7 @@ export const selectFilteredObservations = memoize((state: ObservationsState) => 
   return out;
 })
 ```
+
 
 Bug Fix 1, where we derive the view of the data on the client side (outside of the store), is probably the simplest model to understand: the store holds the state, and you use the UI to work out the view. This approach is hydration-safe by default if the derivation only runs on the client, after hydration. React never has to compare server and client snapshots of a derived array, because the store itself remains stable during hydration. The tradeoff might be that you’re doing extra work as filtering happens every render (not an issue in an app as small as this), and you could end up duplicating logic if you’re reusing the same filters elsewhere.
 
