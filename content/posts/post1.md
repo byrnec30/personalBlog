@@ -6,11 +6,20 @@ tags = ["react", "nextjs", "zustand", "hydration", "debugging"]
 category = "general"
 +++
 
+
 I hit a bug in my Zustand/React app, and solving it helped me to see exactly how React’s rendering lifecycle works.
 
 I created a very basic app to log observations of native plant and animal species, and I wanted to put in a filter box to sort my observations by species and location.
 
-[Screen Recording 2025-10-08 at 21.34.28.mov](/post1/screenRecordingBlogPost1.mov)
+
+<video controls preload="metadata" width="100%">
+  <source src="{{< staticurl "post1/screenRecordingBlogPost1.mov" >}}" type="video/quicktime">
+  Your browser does not support the video tag.
+</video>
+
+
+[Download the screen recording]({{< staticurl "post1/screenRecordingBlogPost1.mov" >}})
+
 
 My simple React and Next.js app has a Zustand store to manage its state. My Zustand store has three state fields:
 
@@ -72,7 +81,7 @@ Only one of my selectors, selectObservationById, didn’t cause any errors; sadl
 
 Here’s where I hit my bug.
 
-![Screenshot 2025-10-05 at 10.47.52.png](/post1/errorMessageBlog1.png)
+![Screenshot 2025-10-05 at 10.47.52.png]({{< staticurl "post1/errorMessageBlog1.png" >}})
 
 selectAllObservations and selectFilteredObservations both use built-in functions (.map() and .filter()), and after some digging I realised that they were causing issues because of React’s rendering lifecycle. Here’s a quick little reminder of how it works.
 
@@ -84,10 +93,10 @@ Then we have the hydration stage on the client side: the browser receives that H
 
 The problem is that Map and Filter functions produce a new array instance on every call. During the hydration phase, React compares the “server snapshot” (what was rendered on the server) with the “client snapshot” (what Zustand’s useSyncExternalStore hook gives it on the client). The problem is that the selectors which use .map() or .filter() output a fresh array each time, which makes React see the client and server snapshots as different objects, even though the contents are the same.
 
-https://blog.stackademic.com/understanding-reacts-render-phase-a-simplified-guide-3a84ea7aacba
+[Understanding React's render phase (Stackademic)](https://blog.stackademic.com/understanding-reacts-render-phase-a-simplified-guide-3a84ea7aacba)
 
 
-![The objects don’t look the same any more](/post1/diagramBlog1.jpg)
+![The objects don’t look the same any more]({{< staticurl "post1/diagramBlog1.jpg" >}})
 
 The objects don’t look the same any more
 
